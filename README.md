@@ -13,7 +13,7 @@ The target is not full Python. The MCU only has `60 KB FLASH` and `16 KB RAM`, s
 ## What is already implemented
 
 - standalone firmware entry point in `firmware/main.c`
-- hardware init for LCD, keypad, backlight, LED2 and a few script-safe GPIOs
+- hardware init for LCD, keypad, backlight, stock red/green LEDs and a few script-safe GPIOs
 - 4-line LCD UI:
   - 3 editor lines
   - 1 status line
@@ -29,12 +29,19 @@ Edit mode:
 - `0-9` and `*`: enter text with phone-style multi-tap
 - `F`: toggle lowercase / uppercase
 - `MENU`: split line at cursor
+- long `MENU`: open the IDE help screen
 - `PTT`: compile and run script
 - `EXIT`: backspace
 - long `EXIT`: clear current line
 - `UP` / `DOWN`: move between lines
 - `SIDE1`: move cursor left
 - `SIDE2`: move cursor right
+
+Help mode:
+
+- `UP` / `DOWN`: previous / next help page
+- `SIDE1` / `SIDE2`: previous / next help page
+- `MENU`, long `MENU`, or `EXIT`: close help
 
 Run mode:
 
@@ -44,6 +51,8 @@ Run mode:
 
 The runtime intentionally exposes only a small safe set for now:
 
+- `red`: stock red TX LED via BK4819
+- `green`: stock green RX LED via BK4819
 - `pb14`: external LED2
 - `pc3`: stock flashlight transistor output
 - `pb6`: backlight output

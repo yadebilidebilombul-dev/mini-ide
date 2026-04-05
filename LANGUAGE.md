@@ -9,6 +9,7 @@ It is deliberately small and easy to parse on the DP32G030.
 - empty lines are allowed
 - comments start with `#`
 - pin names are written as `pa0`, `pb14`, `pc5`
+- built-in aliases `red` and `green` control the stock TX/RX LEDs
 - labels are used for loops and jumps
 
 ## Commands
@@ -49,14 +50,18 @@ It is deliberately small and easy to parse on the DP32G030.
 
 - stop program execution
 
-## Example: blink LED2
+## Example: blink stock LEDs
 
 ```text
-pinmode pb14 out
+pinmode red out
+pinmode green out
 label loop
-write pb14 1
+write red 1
 sleep 100
-write pb14 0
+write red 0
+write green 1
+sleep 100
+write green 0
 sleep 100
 goto loop
 ```
@@ -65,13 +70,13 @@ goto loop
 
 ```text
 pinmode pc5 in
-pinmode pb14 out
+pinmode red out
 label loop
 if pc5 0 goto pressed
-write pb14 0
+write red 0
 goto loop
 label pressed
-write pb14 1
+write red 1
 goto loop
 ```
 

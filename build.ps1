@@ -15,6 +15,7 @@ $Sources = @(
     (Join-Path $Root "start.S"),
     (Join-Path $Root "init.c"),
     (Join-Path $Root "driver\gpio.c"),
+    (Join-Path $Root "driver\bk4819.c"),
     (Join-Path $Root "driver\spi.c"),
     (Join-Path $Root "driver\st7565.c"),
     (Join-Path $Root "driver\system.c"),

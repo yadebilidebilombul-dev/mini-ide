@@ -42,6 +42,9 @@ typedef enum {
 
 typedef uint8_t mini_pin_t;
 
+#define MINI_PIN_RED    ((mini_pin_t)0xE0U)
+#define MINI_PIN_GREEN  ((mini_pin_t)0xE1U)
+
 typedef struct {
 	mini_opcode_t opcode;
 	uint8_t arg0;

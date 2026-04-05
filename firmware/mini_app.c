@@ -14,6 +14,7 @@
 #define IDE_MULTI_TAP_MS         900U
 #define IDE_STATUS_MS            1800U
 #define IDE_VM_BUDGET            16U
+#define IDE_HELP_PAGE_COUNT      4U
 
 typedef struct {
 	char lines[IDE_MAX_LINES][IDE_LINE_CAP + 1U];
@@ -27,6 +28,8 @@ typedef struct {
 	char status_text[17];
 	uint16_t status_timeout_ms;
 	bool is_running;
+	bool help_visible;
+	uint8_t help_page;
 	bool pending_active;
 	KEY_Code_t pending_key;
 	uint8_t pending_index;
@@ -45,6 +48,29 @@ static const mini_hal_t gIdeHal = {
 	IDE_BOARD_DigitalWrite,
 	IDE_BOARD_DigitalRead,
 	IDE_BOARD_SleepMs,
+};
+
+static const char *const gIdeHelpPages[IDE_HELP_PAGE_COUNT][3] = {
+	{
+		"long menu help  ",
+		"ptt run or stop ",
+		"f case exit bksp",
+	},
+	{
+		"0-9 * multi tap ",
+		"menu split line ",
+		"side mv updn row",
+	},
+	{
+		"pinmode red out ",
+		"write red 1     ",
+		"write green 1   ",
+	},
+	{
+		"sleep 100       ",
+		"label loop      ",
+		"if pc5 0 goto x ",
+	},
 };
 
 static void IDE_APP_CopyText16(char *dest, const char *src)
@@ -409,10 +435,17 @@ static void IDE_APP_StopProgram(const char *reason)
 static void IDE_APP_SetDefaultStatus(char *status)
 {
 	static const char edit_template[] = "edit l00 c00 lo ";
+	static const char help_template[] = "help 0/0 updn x";
 	static const char run_template[] = "run ptt stop   ";
 
 	if (gIdeApp.is_running) {
 		IDE_APP_CopyText16(status, run_template);
+		return;
+	}
+	if (gIdeApp.help_visible) {
+		IDE_APP_CopyText16(status, help_template);
+		status[5] = (char)('1' + gIdeApp.help_page);
+		status[7] = (char)('0' + IDE_HELP_PAGE_COUNT);
 		return;
 	}
 
@@ -428,14 +461,17 @@ static void IDE_APP_SetDefaultStatus(char *status)
 void IDE_APP_Init(void)
 {
 	static const char *const default_script[] = {
-		"pinmode pb14 out",
+		"pinmode red out",
+		"pinmode green out",
 		"label loop",
-		"write pb14 1",
+		"write red 1",
 		"sleep 100",
-		"write pb14 0",
+		"write red 0",
+		"write green 1",
+		"sleep 100",
+		"write green 0",
 		"sleep 100",
 		"goto loop",
-		"",
 	};
 	uint8_t line;
 
@@ -505,8 +541,54 @@ void IDE_APP_HandleEvent(const ide_input_event_t *event)
 		return;
 	}
 
+	if (gIdeApp.help_visible) {
+		if (event->type == IDE_INPUT_EVENT_LONG && event->key == KEY_MENU) {
+			gIdeApp.help_visible = false;
+			gIdeApp.dirty = true;
+			return;
+		}
+
+		if (event->type != IDE_INPUT_EVENT_PRESS) {
+			return;
+		}
+
+		switch (event->key) {
+		case KEY_MENU:
+		case KEY_EXIT:
+			gIdeApp.help_visible = false;
+			gIdeApp.dirty = true;
+			return;
+
+		case KEY_UP:
+		case KEY_SIDE1:
+			if (gIdeApp.help_page > 0U) {
+				gIdeApp.help_page--;
+				gIdeApp.dirty = true;
+			}
+			return;
+
+		case KEY_DOWN:
+		case KEY_SIDE2:
+			if (gIdeApp.help_page + 1U < IDE_HELP_PAGE_COUNT) {
+				gIdeApp.help_page++;
+				gIdeApp.dirty = true;
+			}
+			return;
+
+		default:
+			return;
+		}
+	}
+
 	if (event->type == IDE_INPUT_EVENT_LONG) {
 		switch (event->key) {
+		case KEY_MENU:
+			IDE_APP_FinalizePendingTap();
+			gIdeApp.help_visible = true;
+			gIdeApp.help_page = 0U;
+			gIdeApp.dirty = true;
+			return;
+
 		case KEY_EXIT:
 			IDE_APP_ClearLine();
 			return;
@@ -578,39 +660,43 @@ bool IDE_APP_NeedsRender(void)
 void IDE_APP_Render(void)
 {
 	uint8_t visible;
-	char line_text[17];
 	char status[17];
 
 	IDE_APP_UpdateViewport();
 	IDE_DISPLAY_Clear();
 
 	for (visible = 0; visible < IDE_VISIBLE_LINES; visible++) {
-		const uint8_t line_index = (uint8_t)(gIdeApp.viewport_top + visible);
-		const char *source = gIdeApp.lines[line_index];
-		uint8_t window_start = 0U;
-		uint8_t cursor_visible_column = 0U;
+		if (gIdeApp.help_visible) {
+			IDE_DISPLAY_DrawTextLine(visible, gIdeHelpPages[gIdeApp.help_page][visible]);
+		} else {
+			char line_text[17];
+			const uint8_t line_index = (uint8_t)(gIdeApp.viewport_top + visible);
+			const char *source = gIdeApp.lines[line_index];
+			uint8_t window_start = 0U;
+			uint8_t cursor_visible_column = 0U;
 
-		IDE_APP_CopyText16(line_text, "");
-		if (line_index == gIdeApp.cursor_line) {
-			if (gIdeApp.cursor_col >= 16U) {
-				window_start = (uint8_t)(gIdeApp.cursor_col - 15U);
+			IDE_APP_CopyText16(line_text, "");
+			if (line_index == gIdeApp.cursor_line) {
+				if (gIdeApp.cursor_col >= 16U) {
+					window_start = (uint8_t)(gIdeApp.cursor_col - 15U);
+				}
+				cursor_visible_column = (uint8_t)(gIdeApp.cursor_col - window_start);
 			}
-			cursor_visible_column = (uint8_t)(gIdeApp.cursor_col - window_start);
-		}
 
-		if (window_start < IDE_LINE_CAP) {
-			IDE_APP_CopyText16(line_text, source + window_start);
-		}
+			if (window_start < IDE_LINE_CAP) {
+				IDE_APP_CopyText16(line_text, source + window_start);
+			}
 
-		IDE_DISPLAY_DrawTextLine(visible, line_text);
-		if (line_index == gIdeApp.cursor_line && !gIdeApp.is_running) {
-			if (gIdeApp.pending_active && gIdeApp.pending_line == gIdeApp.cursor_line) {
-				cursor_visible_column = (uint8_t)(gIdeApp.pending_col - window_start);
-				if (cursor_visible_column < 16U) {
+			IDE_DISPLAY_DrawTextLine(visible, line_text);
+			if (line_index == gIdeApp.cursor_line && !gIdeApp.is_running) {
+				if (gIdeApp.pending_active && gIdeApp.pending_line == gIdeApp.cursor_line) {
+					cursor_visible_column = (uint8_t)(gIdeApp.pending_col - window_start);
+					if (cursor_visible_column < 16U) {
+						IDE_DISPLAY_InvertCell(visible, cursor_visible_column);
+					}
+				} else if (gIdeApp.cursor_visible && cursor_visible_column < 16U) {
 					IDE_DISPLAY_InvertCell(visible, cursor_visible_column);
 				}
-			} else if (gIdeApp.cursor_visible && cursor_visible_column < 16U) {
-				IDE_DISPLAY_InvertCell(visible, cursor_visible_column);
 			}
 		}
 	}

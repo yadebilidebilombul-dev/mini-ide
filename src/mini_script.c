@@ -193,6 +193,14 @@ mini_result_t MINI_ParsePin(const char *text, mini_pin_t *pin)
 	if (text == 0 || pin == 0) {
 		return MINI_ERR_BAD_ARGUMENT;
 	}
+	if (MINI_StringEquals(text, "red")) {
+		*pin = MINI_PIN_RED;
+		return MINI_OK;
+	}
+	if (MINI_StringEquals(text, "green")) {
+		*pin = MINI_PIN_GREEN;
+		return MINI_OK;
+	}
 	if (text[0] != 'P' && text[0] != 'p') {
 		return MINI_ERR_UNKNOWN_PIN;
 	}
@@ -212,6 +220,12 @@ mini_result_t MINI_ParsePin(const char *text, mini_pin_t *pin)
 
 char MINI_PinPort(mini_pin_t pin)
 {
+	if (pin == MINI_PIN_RED) {
+		return 'R';
+	}
+	if (pin == MINI_PIN_GREEN) {
+		return 'G';
+	}
 	return (char)('A' + ((pin >> 5) & 0x03U));
 }
 
