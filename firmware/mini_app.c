@@ -408,7 +408,7 @@ static void IDE_APP_StopProgram(const char *reason)
 static void IDE_APP_SetDefaultStatus(char *status)
 {
 	static const char edit_template[] = "edit l00 c00 lo ";
-	static const char run_template[] = "run s2 long st ";
+	static const char run_template[] = "run ptt stop   ";
 
 	if (gIdeApp.is_running) {
 		IDE_APP_CopyText16(status, run_template);
@@ -447,7 +447,7 @@ void IDE_APP_Init(void)
 	gIdeApp.cursor_blink_ms = IDE_CURSOR_BLINK_MS;
 	gIdeApp.dirty = true;
 	gIdeApp.viewport_top = 0U;
-	IDE_APP_SetStatus("side1 long run", IDE_STATUS_MS);
+	IDE_APP_SetStatus("ptt run/stop", IDE_STATUS_MS);
 }
 
 void IDE_APP_Tick(uint16_t elapsed_ms)
@@ -496,7 +496,7 @@ void IDE_APP_HandleEvent(const ide_input_event_t *event)
 	}
 
 	if (gIdeApp.is_running) {
-		if ((event->type == IDE_INPUT_EVENT_LONG && event->key == KEY_SIDE2) || (event->type == IDE_INPUT_EVENT_PRESS && event->key == KEY_EXIT)) {
+		if (event->type == IDE_INPUT_EVENT_PRESS && event->key == KEY_PTT) {
 			IDE_APP_StopProgram("stopped");
 		}
 		return;
@@ -504,10 +504,6 @@ void IDE_APP_HandleEvent(const ide_input_event_t *event)
 
 	if (event->type == IDE_INPUT_EVENT_LONG) {
 		switch (event->key) {
-		case KEY_SIDE1:
-			IDE_APP_StartProgram();
-			return;
-
 		case KEY_EXIT:
 			IDE_APP_ClearLine();
 			return;
@@ -534,6 +530,10 @@ void IDE_APP_HandleEvent(const ide_input_event_t *event)
 
 	case KEY_MENU:
 		IDE_APP_SplitLine();
+		break;
+
+	case KEY_PTT:
+		IDE_APP_StartProgram();
 		break;
 
 	case KEY_EXIT:

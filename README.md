@@ -29,17 +29,16 @@ Edit mode:
 - `0-9` and `*`: enter text with phone-style multi-tap
 - `F`: toggle lowercase / uppercase
 - `MENU`: split line at cursor
+- `PTT`: compile and run script
 - `EXIT`: backspace
 - long `EXIT`: clear current line
 - `UP` / `DOWN`: move between lines
 - `SIDE1`: move cursor left
 - `SIDE2`: move cursor right
-- long `SIDE1`: compile and run script
 
 Run mode:
 
-- `EXIT`: stop script
-- long `SIDE2`: stop script
+- `PTT`: stop script
 
 ## Current safe script pins
 
