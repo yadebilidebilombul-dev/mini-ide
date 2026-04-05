@@ -3,3 +3,5 @@
 *.packed.bin
 *.rar
 GCC/
+!mini-ide.bin
+!mini-ide.packed.bin

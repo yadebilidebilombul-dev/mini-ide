@@ -121,9 +121,6 @@ void IDE_BOARD_ResetScriptPins(void)
 	IDE_BOARD_PinMode(IDE_PIN_PC3, MINI_PIN_MODE_OUT);
 	IDE_BOARD_DigitalWrite(IDE_PIN_PC3, false);
 
-	IDE_BOARD_PinMode(IDE_PIN_PB6, MINI_PIN_MODE_OUT);
-	IDE_BOARD_DigitalWrite(IDE_PIN_PB6, false);
-
 	IDE_BOARD_PinMode(IDE_PIN_PC5, MINI_PIN_MODE_IN);
 }
 
