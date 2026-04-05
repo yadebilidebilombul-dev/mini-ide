@@ -7,7 +7,6 @@
 #define MINI_LINE_CAP 64U
 #define MINI_TOKEN_CAP 16U
 #define MINI_MAX_TOKENS 6U
-
 typedef struct {
 	char items[MINI_MAX_TOKENS][MINI_TOKEN_CAP];
 	uint8_t count;
@@ -286,6 +285,7 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 {
 	mini_instruction_t instruction;
 	mini_result_t result;
+	mini_pin_t pin;
 	uint16_t value16;
 	uint8_t bit;
 	int16_t label_pc;
@@ -303,10 +303,11 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 		if (tokens->count != 3U) {
 			return MINI_ERR_SYNTAX;
 		}
-		result = MINI_ParsePin(tokens->items[1], &instruction.arg0);
+		result = MINI_ParsePin(tokens->items[1], &pin);
 		if (result != MINI_OK) {
 			return result;
 		}
+		instruction.arg0 = pin;
 		if (MINI_StringEquals(tokens->items[2], "in")) {
 			instruction.opcode = MINI_OP_PINMODE;
 			instruction.arg1 = MINI_PIN_MODE_IN;
@@ -324,10 +325,11 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 		if (tokens->count != 3U) {
 			return MINI_ERR_SYNTAX;
 		}
-		result = MINI_ParsePin(tokens->items[1], &instruction.arg0);
+		result = MINI_ParsePin(tokens->items[1], &pin);
 		if (result != MINI_OK) {
 			return result;
 		}
+		instruction.arg0 = pin;
 		if (!MINI_ParseBit(tokens->items[2], &bit)) {
 			return MINI_ERR_BAD_ARGUMENT;
 		}
@@ -340,10 +342,11 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 		if (tokens->count != 2U) {
 			return MINI_ERR_SYNTAX;
 		}
-		result = MINI_ParsePin(tokens->items[1], &instruction.arg0);
+		result = MINI_ParsePin(tokens->items[1], &pin);
 		if (result != MINI_OK) {
 			return result;
 		}
+		instruction.arg0 = pin;
 		instruction.opcode = MINI_OP_TOGGLE;
 		return MINI_EmitInstruction(program, &instruction);
 	}
@@ -364,15 +367,32 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 		if (tokens->count != 3U) {
 			return MINI_ERR_SYNTAX;
 		}
-		result = MINI_ParsePin(tokens->items[1], &instruction.arg0);
+		result = MINI_ParsePin(tokens->items[1], &pin);
 		if (result != MINI_OK) {
 			return result;
 		}
+		instruction.arg0 = pin;
 		if (!MINI_ParseBit(tokens->items[2], &bit)) {
 			return MINI_ERR_BAD_ARGUMENT;
 		}
 		instruction.opcode = MINI_OP_WAIT;
 		instruction.arg1 = bit;
+		return MINI_EmitInstruction(program, &instruction);
+	}
+
+	if (MINI_StringEquals(tokens->items[0], "beep")) {
+		if (tokens->count != 3U) {
+			return MINI_ERR_SYNTAX;
+		}
+		if (!MINI_ParseUnsigned16(tokens->items[1], &value16)) {
+			return MINI_ERR_BAD_ARGUMENT;
+		}
+		instruction.opcode = MINI_OP_BEEP;
+		instruction.arg0 = value16;
+		if (!MINI_ParseUnsigned16(tokens->items[2], &value16)) {
+			return MINI_ERR_BAD_ARGUMENT;
+		}
+		instruction.arg1 = value16;
 		return MINI_EmitInstruction(program, &instruction);
 	}
 
@@ -393,10 +413,11 @@ static mini_result_t MINI_CompileLine(mini_program_t *program, const mini_tokens
 		if (tokens->count != 5U || !MINI_StringEquals(tokens->items[3], "goto")) {
 			return MINI_ERR_SYNTAX;
 		}
-		result = MINI_ParsePin(tokens->items[1], &instruction.arg0);
+		result = MINI_ParsePin(tokens->items[1], &pin);
 		if (result != MINI_OK) {
 			return result;
 		}
+		instruction.arg0 = pin;
 		if (!MINI_ParseBit(tokens->items[2], &bit)) {
 			return MINI_ERR_BAD_ARGUMENT;
 		}
@@ -506,7 +527,7 @@ mini_result_t MINI_VM_Tick(mini_vm_t *vm, const mini_program_t *program, const m
 	if (vm == 0 || program == 0 || hal == 0) {
 		return MINI_ERR_BAD_ARGUMENT;
 	}
-	if (hal->pin_mode == 0 || hal->digital_write == 0 || hal->digital_read == 0 || hal->sleep_ms == 0) {
+	if (hal->pin_mode == 0 || hal->digital_write == 0 || hal->digital_read == 0 || hal->beep_start == 0 || hal->beep_stop == 0 || hal->sleep_ms == 0) {
 		vm->last_result = MINI_ERR_HAL_MISSING;
 		vm->is_running = false;
 		return vm->last_result;
@@ -523,6 +544,10 @@ mini_result_t MINI_VM_Tick(mini_vm_t *vm, const mini_program_t *program, const m
 
 		elapsed_ms = (uint16_t)(elapsed_ms - vm->sleep_remaining_ms);
 		vm->sleep_remaining_ms = 0U;
+		if (vm->tone_active) {
+			hal->beep_stop();
+			vm->tone_active = false;
+		}
 	}
 
 	if (vm->is_waiting) {
@@ -594,6 +619,13 @@ mini_result_t MINI_VM_Tick(mini_vm_t *vm, const mini_program_t *program, const m
 			vm->pc++;
 			break;
 
+		case MINI_OP_BEEP:
+			hal->beep_start(instruction->arg0);
+			vm->tone_active = true;
+			vm->sleep_remaining_ms = instruction->arg1;
+			vm->pc++;
+			return MINI_OK;
+
 		case MINI_OP_GOTO:
 			vm->pc = instruction->arg2;
 			continue;
@@ -634,7 +666,7 @@ mini_result_t MINI_Run(const mini_program_t *program, const mini_hal_t *hal, uin
 	if (program == 0 || hal == 0) {
 		return MINI_ERR_BAD_ARGUMENT;
 	}
-	if (hal->pin_mode == 0 || hal->digital_write == 0 || hal->digital_read == 0 || hal->sleep_ms == 0) {
+	if (hal->pin_mode == 0 || hal->digital_write == 0 || hal->digital_read == 0 || hal->beep_start == 0 || hal->beep_stop == 0 || hal->sleep_ms == 0) {
 		return MINI_ERR_HAL_MISSING;
 	}
 
@@ -653,6 +685,10 @@ mini_result_t MINI_Run(const mini_program_t *program, const mini_hal_t *hal, uin
 		if (vm.sleep_remaining_ms != 0U) {
 			hal->sleep_ms(vm.sleep_remaining_ms);
 			vm.sleep_remaining_ms = 0U;
+			if (vm.tone_active) {
+				hal->beep_stop();
+				vm.tone_active = false;
+			}
 		}
 	}
 

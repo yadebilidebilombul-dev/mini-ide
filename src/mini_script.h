@@ -35,6 +35,7 @@ typedef enum {
 	MINI_OP_TOGGLE,
 	MINI_OP_SLEEP,
 	MINI_OP_WAIT,
+	MINI_OP_BEEP,
 	MINI_OP_GOTO,
 	MINI_OP_IF_GOTO,
 	MINI_OP_END,
@@ -44,8 +45,8 @@ typedef uint8_t mini_pin_t;
 
 typedef struct {
 	mini_opcode_t opcode;
-	uint8_t arg0;
-	uint8_t arg1;
+	uint16_t arg0;
+	uint16_t arg1;
 	uint16_t arg2;
 } mini_instruction_t;
 
@@ -66,6 +67,8 @@ typedef struct {
 	void (*pin_mode)(mini_pin_t pin, mini_pin_mode_t mode);
 	void (*digital_write)(mini_pin_t pin, bool value);
 	bool (*digital_read)(mini_pin_t pin);
+	void (*beep_start)(uint16_t frequency);
+	void (*beep_stop)(void);
 	void (*sleep_ms)(uint16_t value);
 } mini_hal_t;
 
@@ -76,6 +79,7 @@ typedef struct {
 	uint8_t wait_value;
 	bool is_running;
 	bool is_waiting;
+	bool tone_active;
 	mini_result_t last_result;
 } mini_vm_t;
 

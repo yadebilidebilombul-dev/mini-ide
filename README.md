@@ -21,6 +21,7 @@ The target is not full Python. The MCU only has `60 KB FLASH` and `16 KB RAM`, s
 - line split, backspace, cursor movement, line scrolling
 - compile and run directly on the radio
 - stop running scripts without rebooting
+- speaker tone command via `beep <hz> <ms>`
 
 ## Current controls
 
@@ -28,6 +29,7 @@ Edit mode:
 
 - `0-9` and `*`: enter text with phone-style multi-tap
 - `F`: toggle lowercase / uppercase
+- long `F`: save current script to reserved flash
 - `MENU`: split line at cursor
 - long `MENU`: open the IDE help screen
 - `PTT`: compile and run script

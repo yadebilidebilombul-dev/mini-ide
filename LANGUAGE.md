@@ -33,6 +33,10 @@ It is deliberately small and easy to parse on the DP32G030.
 
 - pause until a pin reaches the requested level
 
+`beep <HZ> <MS>`
+
+- play a tone on the speaker for the requested duration, for example `beep 1000 120`
+
 `label <NAME>`
 
 - define a jump label
@@ -54,6 +58,7 @@ It is deliberately small and easy to parse on the DP32G030.
 ```text
 pinmode pc3 out
 label loop
+beep 1000 120
 write pc3 1
 sleep 100
 write pc3 0

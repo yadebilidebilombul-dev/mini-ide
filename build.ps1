@@ -14,6 +14,9 @@ $Size = Join-Path $GccBin "arm-none-eabi-size.exe"
 $Sources = @(
     (Join-Path $Root "start.S"),
     (Join-Path $Root "init.c"),
+    (Join-Path $Root "sram-overlay.c"),
+    (Join-Path $Root "driver\bk4819.c"),
+    (Join-Path $Root "driver\flash.c"),
     (Join-Path $Root "driver\gpio.c"),
     (Join-Path $Root "driver\spi.c"),
     (Join-Path $Root "driver\st7565.c"),
@@ -26,6 +29,7 @@ $Sources = @(
     (Join-Path $MiniRoot "firmware\mini_display.c"),
     (Join-Path $MiniRoot "firmware\mini_input.c"),
     (Join-Path $MiniRoot "firmware\mini_app.c"),
+    (Join-Path $MiniRoot "firmware\mini_storage.c"),
     (Join-Path $MiniRoot "firmware\main.c")
 )
 
@@ -49,7 +53,7 @@ $CommonFlags = @(
 )
 
 $AsmFlags = @("-c", "-mcpu=cortex-m0")
-$LdFlags = @("-mcpu=cortex-m0", "-nostartfiles", "-Wl,-T,$(Join-Path $Root 'firmware.ld')")
+$LdFlags = @("-mcpu=cortex-m0", "-nostartfiles", "-Wl,-T,$(Join-Path $MiniRoot 'firmware-mini.ld')")
 
 if (Test-Path $BuildDir) {
     Remove-Item -LiteralPath $BuildDir -Recurse -Force

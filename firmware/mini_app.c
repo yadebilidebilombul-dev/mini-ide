@@ -4,6 +4,7 @@
 
 #include "firmware/mini_board.h"
 #include "firmware/mini_display.h"
+#include "firmware/mini_storage.h"
 #include "src/mini_script.h"
 
 #define IDE_MAX_LINES            16U
@@ -47,6 +48,8 @@ static const mini_hal_t gIdeHal = {
 	IDE_BOARD_PinMode,
 	IDE_BOARD_DigitalWrite,
 	IDE_BOARD_DigitalRead,
+	IDE_BOARD_BeepStart,
+	IDE_BOARD_BeepStop,
 	IDE_BOARD_SleepMs,
 };
 
@@ -54,7 +57,7 @@ static const char *const gIdeHelpPages[IDE_HELP_PAGE_COUNT][3] = {
 	{
 		"long menu help  ",
 		"ptt run or stop ",
-		"f case exit bksp",
+		"long f save code",
 	},
 	{
 		"0-9 * multi tap ",
@@ -64,7 +67,7 @@ static const char *const gIdeHelpPages[IDE_HELP_PAGE_COUNT][3] = {
 	{
 		"pinmode pc3 out ",
 		"write pc3 1     ",
-		"toggle pc3      ",
+		"beep 1000 120   ",
 	},
 	{
 		"sleep 100       ",
@@ -400,6 +403,54 @@ static void IDE_APP_BuildSource(char *buffer, uint16_t buffer_size)
 	buffer[offset] = 0;
 }
 
+static void IDE_APP_LoadSource(const char *source)
+{
+	uint8_t line = 0U;
+	uint8_t column = 0U;
+
+	memset(gIdeApp.lines, 0, sizeof(gIdeApp.lines));
+	while (*source != 0 && line < IDE_MAX_LINES) {
+		if (*source == '\r') {
+			source++;
+			continue;
+		}
+		if (*source == '\n') {
+			line++;
+			column = 0U;
+			source++;
+			continue;
+		}
+		if (column < IDE_LINE_CAP) {
+			gIdeApp.lines[line][column++] = *source;
+		}
+		source++;
+	}
+}
+
+static void IDE_APP_SaveProgram(void)
+{
+	char source[(IDE_MAX_LINES * (IDE_LINE_CAP + 1U)) + 1U];
+	ide_storage_save_result_t result;
+
+	IDE_APP_FinalizePendingTap();
+	IDE_APP_BuildSource(source, sizeof(source));
+	result = IDE_STORAGE_SaveScript(source);
+	switch (result) {
+	case IDE_STORAGE_SAVE_OK:
+		IDE_APP_SetStatus("saved", IDE_STATUS_MS);
+		break;
+	case IDE_STORAGE_SAVE_UNCHANGED:
+		IDE_APP_SetStatus("save skipped", IDE_STATUS_MS);
+		break;
+	case IDE_STORAGE_SAVE_TOO_LARGE:
+		IDE_APP_SetStatus("script too big", IDE_STATUS_MS);
+		break;
+	default:
+		IDE_APP_SetStatus("save failed", IDE_STATUS_MS);
+		break;
+	}
+}
+
 static void IDE_APP_StartProgram(void)
 {
 	char source[(IDE_MAX_LINES * (IDE_LINE_CAP + 1U)) + 1U];
@@ -460,11 +511,12 @@ static void IDE_APP_SetDefaultStatus(char *status)
 
 void IDE_APP_Init(void)
 {
+	char saved_source[(IDE_MAX_LINES * (IDE_LINE_CAP + 1U)) + 1U];
 	static const char *const default_script[] = {
 		"pinmode pc3 out",
 		"label loop",
 		"write pc3 1",
-		"sleep 100",
+		"beep 1000 120",
 		"write pc3 0",
 		"sleep 100",
 		"goto loop",
@@ -473,8 +525,13 @@ void IDE_APP_Init(void)
 	uint8_t line;
 
 	memset(&gIdeApp, 0, sizeof(gIdeApp));
-	for (line = 0; line < sizeof(default_script) / sizeof(default_script[0]); line++) {
-		strcpy(gIdeApp.lines[line], default_script[line]);
+	IDE_STORAGE_Init();
+	if (IDE_STORAGE_LoadScript(saved_source, sizeof(saved_source))) {
+		IDE_APP_LoadSource(saved_source);
+	} else {
+		for (line = 0; line < sizeof(default_script) / sizeof(default_script[0]); line++) {
+			strcpy(gIdeApp.lines[line], default_script[line]);
+		}
 	}
 
 	gIdeApp.cursor_visible = true;
@@ -588,6 +645,10 @@ void IDE_APP_HandleEvent(const ide_input_event_t *event)
 
 		case KEY_EXIT:
 			IDE_APP_ClearLine();
+			return;
+
+		case KEY_F:
+			IDE_APP_SaveProgram();
 			return;
 
 		default:
