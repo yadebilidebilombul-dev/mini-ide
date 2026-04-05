@@ -50,14 +50,51 @@ Run mode:
 
 ## Current safe script pins
 
-The runtime intentionally exposes only a small safe set for now:
+The runtime exposes 26 safe GPIO pins carefully selected to not interfere with the radio's critical subsystems:
 
-- `pb14`: external LED2
-- `pc3`: stock flashlight transistor output
+**GPIOA (4 pins) - Free pins:**
+- `pa0`: free output/input
+- `pa1`: free output/input
+- `pa2`: free output/input
+- `pa15`: free output/input
+
+**GPIOB (10 pins) - Mix of original + free pins:**
+- `pb0`: free output/input
+- `pb1`: free output/input
+- `pb2`: free output/input
+- `pb3`: free output/input
+- `pb4`: free output/input
+- `pb5`: free output/input
 - `pb6`: backlight output
-- `pc5`: PTT line
+- `pb12`: free output/input
+- `pb13`: free output/input
+- `pb14`: external LED2 output
 
-That keeps the editor usable and avoids letting a script instantly kill the LCD or keypad by reconfiguring their pins.
+**GPIOC (12 pins) - Original PTT + Flashlight + Free pins:**
+- `pc3`: stock flashlight transistor output
+- `pc5`: PTT line (input/output capable)
+- `pc6`: free output/input
+- `pc7`: free output/input
+- `pc8`: free output/input
+- `pc9`: free output/input
+- `pc10`: free output/input
+- `pc11`: free output/input
+- `pc12`: free output/input
+- `pc13`: free output/input
+- `pc14`: free output/input
+- `pc15`: free output/input
+
+All pins are verified not to be used by:
+- Radio IC (BK4819) SCN/SCL/SDA
+- LCD (ST7565) control lines
+- SPI flash interface
+- Keyboard matrix
+- Audio path
+- Battery monitoring ADC
+- UART/debugger pins
+- FM radio IC (BK1080)
+
+This deliberately excludes critical pins to keep the radio functional and prevent script-based damage.
 
 ## Files
 

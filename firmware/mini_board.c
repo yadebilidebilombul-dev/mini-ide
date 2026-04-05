@@ -13,10 +13,37 @@
 #define IDE_PIN_ENCODE(port, number)  ((((uint8_t)(port)) << 5) | ((number) & 0x1FU))
 
 enum {
+	// GPIOA free pins
+	IDE_PIN_PA0  = IDE_PIN_ENCODE(0U, 0U),
+	IDE_PIN_PA1  = IDE_PIN_ENCODE(0U, 1U),
+	IDE_PIN_PA2  = IDE_PIN_ENCODE(0U, 2U),
+	IDE_PIN_PA15 = IDE_PIN_ENCODE(0U, 15U),
+	
+	// GPIOB pins (original 2 + new free pins)
+	IDE_PIN_PB0  = IDE_PIN_ENCODE(1U, 0U),
+	IDE_PIN_PB1  = IDE_PIN_ENCODE(1U, 1U),
+	IDE_PIN_PB2  = IDE_PIN_ENCODE(1U, 2U),
+	IDE_PIN_PB3  = IDE_PIN_ENCODE(1U, 3U),
+	IDE_PIN_PB4  = IDE_PIN_ENCODE(1U, 4U),
+	IDE_PIN_PB5  = IDE_PIN_ENCODE(1U, 5U),
 	IDE_PIN_PB6  = IDE_PIN_ENCODE(1U, 6U),
+	IDE_PIN_PB12 = IDE_PIN_ENCODE(1U, 12U),
+	IDE_PIN_PB13 = IDE_PIN_ENCODE(1U, 13U),
 	IDE_PIN_PB14 = IDE_PIN_ENCODE(1U, 14U),
+	
+	// GPIOC pins (original + new free pins)
 	IDE_PIN_PC3  = IDE_PIN_ENCODE(2U, 3U),
 	IDE_PIN_PC5  = IDE_PIN_ENCODE(2U, 5U),
+	IDE_PIN_PC6  = IDE_PIN_ENCODE(2U, 6U),
+	IDE_PIN_PC7  = IDE_PIN_ENCODE(2U, 7U),
+	IDE_PIN_PC8  = IDE_PIN_ENCODE(2U, 8U),
+	IDE_PIN_PC9  = IDE_PIN_ENCODE(2U, 9U),
+	IDE_PIN_PC10 = IDE_PIN_ENCODE(2U, 10U),
+	IDE_PIN_PC11 = IDE_PIN_ENCODE(2U, 11U),
+	IDE_PIN_PC12 = IDE_PIN_ENCODE(2U, 12U),
+	IDE_PIN_PC13 = IDE_PIN_ENCODE(2U, 13U),
+	IDE_PIN_PC14 = IDE_PIN_ENCODE(2U, 14U),
+	IDE_PIN_PC15 = IDE_PIN_ENCODE(2U, 15U),
 };
 
 static volatile GPIO_Bank_t *IDE_BOARD_GetBank(mini_pin_t pin)
@@ -123,18 +150,85 @@ void IDE_BOARD_ResetScriptPins(void)
 {
 	IDE_BOARD_BeepStop();
 
+	// Reset all GPIOA free pins to safe state
+	IDE_BOARD_PinMode(IDE_PIN_PA0, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PA0, false);
+	IDE_BOARD_PinMode(IDE_PIN_PA1, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PA1, false);
+	IDE_BOARD_PinMode(IDE_PIN_PA2, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PA2, false);
+	IDE_BOARD_PinMode(IDE_PIN_PA15, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PA15, false);
+
+	// Reset all GPIOB free pins to safe state
+	IDE_BOARD_PinMode(IDE_PIN_PB0, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB0, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB1, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB1, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB2, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB2, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB3, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB3, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB4, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB4, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB5, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB5, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB12, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB12, false);
+	IDE_BOARD_PinMode(IDE_PIN_PB13, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB13, false);
+
+	// Reset original pins plus new PC free pins
 	IDE_BOARD_PinMode(IDE_PIN_PB14, MINI_PIN_MODE_OUT);
 	IDE_BOARD_DigitalWrite(IDE_PIN_PB14, false);
 
 	IDE_BOARD_PinMode(IDE_PIN_PC3, MINI_PIN_MODE_OUT);
 	IDE_BOARD_DigitalWrite(IDE_PIN_PC3, false);
 
+	// Reset all GPIOC free pins to safe state
+	IDE_BOARD_PinMode(IDE_PIN_PC6, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC6, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC7, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC7, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC8, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC8, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC9, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC9, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC10, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC10, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC11, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC11, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC12, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC12, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC13, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC13, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC14, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC14, false);
+	IDE_BOARD_PinMode(IDE_PIN_PC15, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC15, false);
+
 	IDE_BOARD_PinMode(IDE_PIN_PC5, MINI_PIN_MODE_IN);
 }
 
 bool IDE_BOARD_IsSupportedPin(mini_pin_t pin)
 {
-	return pin == IDE_PIN_PB6 || pin == IDE_PIN_PB14 || pin == IDE_PIN_PC3 || pin == IDE_PIN_PC5;
+	// GPIOA free pins
+	if (pin == IDE_PIN_PA0 || pin == IDE_PIN_PA1 || pin == IDE_PIN_PA2 || pin == IDE_PIN_PA15) {
+		return true;
+	}
+	// GPIOB free and safe pins
+	if (pin == IDE_PIN_PB0 || pin == IDE_PIN_PB1 || pin == IDE_PIN_PB2 || pin == IDE_PIN_PB3 ||
+	    pin == IDE_PIN_PB4 || pin == IDE_PIN_PB5 || pin == IDE_PIN_PB6 || pin == IDE_PIN_PB12 ||
+	    pin == IDE_PIN_PB13 || pin == IDE_PIN_PB14) {
+		return true;
+	}
+	// GPIOC free and safe pins
+	if (pin == IDE_PIN_PC3 || pin == IDE_PIN_PC5 || pin == IDE_PIN_PC6 || pin == IDE_PIN_PC7 ||
+	    pin == IDE_PIN_PC8 || pin == IDE_PIN_PC9 || pin == IDE_PIN_PC10 || pin == IDE_PIN_PC11 ||
+	    pin == IDE_PIN_PC12 || pin == IDE_PIN_PC13 || pin == IDE_PIN_PC14 || pin == IDE_PIN_PC15) {
+		return true;
+	}
+	return false;
 }
 
 void IDE_BOARD_PinMode(mini_pin_t pin, mini_pin_mode_t mode)
@@ -147,12 +241,47 @@ void IDE_BOARD_PinMode(mini_pin_t pin, mini_pin_mode_t mode)
 	}
 
 	switch (pin) {
+	// GPIOA free pins - basic GPIO setup
+	case IDE_PIN_PA0:
+	case IDE_PIN_PA1:
+	case IDE_PIN_PA2:
+	case IDE_PIN_PA15:
+		// These are free pins, configure as GPIO
+		PORTCON_PORTA_IE &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTA_PU &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTA_PD &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTA_OD &= ~(1U << MINI_PinNumber(pin));
+		break;
+
+	// GPIOB pins
+	case IDE_PIN_PB0:
+	case IDE_PIN_PB1:
+	case IDE_PIN_PB2:
+	case IDE_PIN_PB3:
+	case IDE_PIN_PB4:
+	case IDE_PIN_PB5:
+		// Free pins in lower range
+		PORTCON_PORTB_IE &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_PU &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_PD &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_OD &= ~(1U << MINI_PinNumber(pin));
+		break;
+
 	case IDE_PIN_PB6:
 		PORTCON_PORTB_SEL0 = (PORTCON_PORTB_SEL0 & ~PORTCON_PORTB_SEL0_B6_MASK) | PORTCON_PORTB_SEL0_B6_BITS_GPIOB6;
 		PORTCON_PORTB_IE &= ~PORTCON_PORTB_IE_B6_MASK;
 		PORTCON_PORTB_PU &= ~PORTCON_PORTB_PU_B6_MASK;
 		PORTCON_PORTB_PD &= ~PORTCON_PORTB_PD_B6_MASK;
 		PORTCON_PORTB_OD &= ~PORTCON_PORTB_OD_B6_MASK;
+		break;
+
+	case IDE_PIN_PB12:
+	case IDE_PIN_PB13:
+		// Free pins in middle range
+		PORTCON_PORTB_IE &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_PU &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_PD &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTB_OD &= ~(1U << MINI_PinNumber(pin));
 		break;
 
 	case IDE_PIN_PB14:
@@ -163,6 +292,7 @@ void IDE_BOARD_PinMode(mini_pin_t pin, mini_pin_mode_t mode)
 		PORTCON_PORTB_OD &= ~PORTCON_PORTB_OD_B14_MASK;
 		break;
 
+	// GPIOC pins
 	case IDE_PIN_PC3:
 		PORTCON_PORTC_SEL0 &= ~PORTCON_PORTC_SEL0_C3_MASK;
 		PORTCON_PORTC_IE &= ~PORTCON_PORTC_IE_C3_MASK;
@@ -184,6 +314,25 @@ void IDE_BOARD_PinMode(mini_pin_t pin, mini_pin_mode_t mode)
 			PORTCON_PORTC_PD &= ~PORTCON_PORTC_PD_C5_MASK;
 			PORTCON_PORTC_OD = (PORTCON_PORTC_OD & ~PORTCON_PORTC_OD_C5_MASK) | PORTCON_PORTC_OD_C5_BITS_DISABLE;
 		}
+		break;
+
+	// GPIOC free pins (PC6-PC15)
+	case IDE_PIN_PC6:
+	case IDE_PIN_PC7:
+	case IDE_PIN_PC8:
+	case IDE_PIN_PC9:
+	case IDE_PIN_PC10:
+	case IDE_PIN_PC11:
+	case IDE_PIN_PC12:
+	case IDE_PIN_PC13:
+	case IDE_PIN_PC14:
+	case IDE_PIN_PC15:
+		// Free pins, configure as GPIO with no pull-up/down
+		PORTCON_PORTC_SEL0 &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTC_IE &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTC_PU &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTC_PD &= ~(1U << MINI_PinNumber(pin));
+		PORTCON_PORTC_OD &= ~(1U << MINI_PinNumber(pin));
 		break;
 
 	default:
