@@ -1,0 +1,12 @@
+# Turn PB14 on while PC5 is low
+pinmode PC5 in
+pinmode PB14 out
+
+label loop
+if PC5 0 goto pressed
+write PB14 0
+goto loop
+
+label pressed
+write PB14 1
+goto loop

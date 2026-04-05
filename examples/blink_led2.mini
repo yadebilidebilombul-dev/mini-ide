@@ -1,0 +1,8 @@
+# Blink LED2 on PB14 forever
+pinmode PB14 out
+label loop
+write PB14 1
+sleep 100
+write PB14 0
+sleep 100
+goto loop
