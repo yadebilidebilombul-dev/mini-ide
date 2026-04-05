@@ -62,9 +62,9 @@ static const char *const gIdeHelpPages[IDE_HELP_PAGE_COUNT][3] = {
 		"side mv updn row",
 	},
 	{
-		"pinmode red out ",
-		"write red 1     ",
-		"write green 1   ",
+		"pinmode pc3 out ",
+		"write pc3 1     ",
+		"toggle pc3      ",
 	},
 	{
 		"sleep 100       ",
@@ -461,17 +461,14 @@ static void IDE_APP_SetDefaultStatus(char *status)
 void IDE_APP_Init(void)
 {
 	static const char *const default_script[] = {
-		"pinmode red out",
-		"pinmode green out",
+		"pinmode pc3 out",
 		"label loop",
-		"write red 1",
+		"write pc3 1",
 		"sleep 100",
-		"write red 0",
-		"write green 1",
-		"sleep 100",
-		"write green 0",
+		"write pc3 0",
 		"sleep 100",
 		"goto loop",
+		"",
 	};
 	uint8_t line;
 
