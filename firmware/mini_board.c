@@ -113,6 +113,20 @@ void IDE_BOARD_Init(void)
 	__enable_irq();
 }
 
+void IDE_BOARD_ResetScriptPins(void)
+{
+	IDE_BOARD_PinMode(IDE_PIN_PB14, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB14, false);
+
+	IDE_BOARD_PinMode(IDE_PIN_PC3, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PC3, false);
+
+	IDE_BOARD_PinMode(IDE_PIN_PB6, MINI_PIN_MODE_OUT);
+	IDE_BOARD_DigitalWrite(IDE_PIN_PB6, false);
+
+	IDE_BOARD_PinMode(IDE_PIN_PC5, MINI_PIN_MODE_IN);
+}
+
 bool IDE_BOARD_IsSupportedPin(mini_pin_t pin)
 {
 	return pin == IDE_PIN_PB6 || pin == IDE_PIN_PB14 || pin == IDE_PIN_PC3 || pin == IDE_PIN_PC5;

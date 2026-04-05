@@ -401,6 +401,7 @@ static void IDE_APP_StartProgram(void)
 static void IDE_APP_StopProgram(const char *reason)
 {
 	MINI_VM_Stop(&gIdeApp.vm);
+	IDE_BOARD_ResetScriptPins();
 	gIdeApp.is_running = false;
 	IDE_APP_SetStatus(reason, IDE_STATUS_MS);
 }
@@ -447,6 +448,7 @@ void IDE_APP_Init(void)
 	gIdeApp.cursor_blink_ms = IDE_CURSOR_BLINK_MS;
 	gIdeApp.dirty = true;
 	gIdeApp.viewport_top = 0U;
+	IDE_BOARD_ResetScriptPins();
 	IDE_APP_SetStatus("ptt run/stop", IDE_STATUS_MS);
 }
 
@@ -483,6 +485,7 @@ void IDE_APP_Tick(uint16_t elapsed_ms)
 		if (result != MINI_OK) {
 			IDE_APP_StopProgram(MINI_ResultString(result));
 		} else if (!MINI_VM_IsRunning(&gIdeApp.vm)) {
+			IDE_BOARD_ResetScriptPins();
 			gIdeApp.is_running = false;
 			IDE_APP_SetStatus("done", IDE_STATUS_MS);
 		}

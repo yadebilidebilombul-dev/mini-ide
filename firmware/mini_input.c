@@ -1,5 +1,8 @@
 #include "firmware/mini_input.h"
 
+#include "bsp/dp32g030/gpio.h"
+#include "driver/gpio.h"
+
 #define IDE_INPUT_DEBOUNCE_TICKS   2U
 #define IDE_INPUT_LONG_PRESS_MS    600U
 #define IDE_INPUT_TICK_MS          10U
@@ -21,7 +24,11 @@ void IDE_INPUT_Init(void)
 
 bool IDE_INPUT_Tick(ide_input_event_t *event)
 {
-	const KEY_Code_t sample = KEYBOARD_Poll();
+	KEY_Code_t sample = KEYBOARD_Poll();
+
+	if (!GPIO_CheckBit(&GPIOC->DATA, GPIOC_PIN_PTT)) {
+		sample = KEY_PTT;
+	}
 
 	event->type = IDE_INPUT_EVENT_NONE;
 	event->key = KEY_INVALID;
