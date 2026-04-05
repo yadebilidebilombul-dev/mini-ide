@@ -1,4 +1,4 @@
-# Codex Mini IDE Firmware
+# Mini IDE Firmware
 
 This folder now contains a standalone firmware for the UV-K5 family.
 It does not patch the stock UI. It is its own firmware image with:
