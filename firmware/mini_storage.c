@@ -5,6 +5,7 @@
 #include "ARMCM0.h"
 #include "bsp/dp32g030/flash.h"
 #include "driver/flash.h"
+#include "driver/system.h"
 #include "sram-overlay.h"
 
 #define IDE_STORAGE_BASE         0x0000E800U
@@ -140,6 +141,16 @@ static bool IDE_STORAGE_Verify(const char *source, uint16_t length)
 
 void IDE_STORAGE_Init(void)
 {
+	overlay_FLASH_MainClock = 48000000U;
+	overlay_FLASH_ClockMultiplier = 48U;
+	FLASH_Init(FLASH_READ_MODE_2_CYCLE);
+}
+
+void BOARD_FLASH_Init(void)
+{
+	FLASH_Init(FLASH_READ_MODE_1_CYCLE);
+	FLASH_ConfigureTrimValues();
+	SYSTEM_ConfigureClocks();
 	overlay_FLASH_MainClock = 48000000U;
 	overlay_FLASH_ClockMultiplier = 48U;
 	FLASH_Init(FLASH_READ_MODE_2_CYCLE);

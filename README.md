@@ -1,7 +1,6 @@
 # Mini IDE Firmware
 
-This folder now contains a standalone firmware for the UV-K5 family.
-It does not patch the stock UI. It is its own firmware image with:
+This repository contains a standalone firmware for the UV-K5 family. It does not patch the stock UI. Instead, it provides its own firmware image with:
 
 - a tiny on-radio code editor,
 - phone-style multi-tap text input,

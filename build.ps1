@@ -46,13 +46,14 @@ $CommonFlags = @(
     "-Wall",
     "-Werror",
     "-mcpu=cortex-m0",
+    "-DENABLE_OVERLAY",
     "-fno-builtin",
     "-fshort-enums",
     "-fno-delete-null-pointer-checks",
     "-std=c11"
 )
 
-$AsmFlags = @("-c", "-mcpu=cortex-m0")
+$AsmFlags = @("-c", "-mcpu=cortex-m0", "-DENABLE_OVERLAY")
 $LdFlags = @("-mcpu=cortex-m0", "-nostartfiles", "-Wl,-T,$(Join-Path $MiniRoot 'firmware-mini.ld')")
 
 if (Test-Path $BuildDir) {
